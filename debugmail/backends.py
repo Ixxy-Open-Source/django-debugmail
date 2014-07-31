@@ -1,6 +1,16 @@
 from .base_settings import *
+import logging
 from django.core.mail.backends.smtp import EmailBackend
-from email_logger.models import log_emails
+
+
+logger = logging.getLogger(__name__)
+
+try:
+    from email_logger.models import log_emails
+except ImportError:
+    # Simple fallback if email_logger isn't installed
+    log_emails = lambda label, emails: logger.debug(label, [email for email in emails])
+
 
 class DebugEmailBackend(EmailBackend):
 
@@ -19,6 +29,10 @@ class DebugEmailBackend(EmailBackend):
             email.bcc = []
 
         super(DebugEmailBackend, self).send_messages(email_messages)
+
+        if LOG_ALL_TO_DB:
+            log_emails('to alternates', email_messages)
+
 
     def send_messages(self, email_messages):
 
@@ -42,8 +56,8 @@ class DebugEmailBackend(EmailBackend):
 
             count = super(DebugEmailBackend, self).send_messages(email_messages)
 
-            if SAVE_TO_DATABASE:
-                log_emails(email_messages)
+            if LOG_TO_DB:
+                log_emails('to real', email_messages)
 
             return count
 
