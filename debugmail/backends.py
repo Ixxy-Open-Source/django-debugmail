@@ -43,13 +43,11 @@ class DebugEmailBackend(EmailBackend):
                 test_recipients = import_string(TEST_RECIPIENTS_GETTER)()
             else:
                 test_recipients = TEST_RECIPIENTS
-            print "-"*80
-            print test_recipients
-            print "-"*80
-            # self._send_to_alternates(
-            #     email_messages,
-            #     test_recipients,
-            # )
+
+            self._send_to_alternates(
+                email_messages,
+                test_recipients,
+            )
 
         if SEND_TO_ADMINS:
             self._send_to_alternates(
