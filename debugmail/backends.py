@@ -1,8 +1,8 @@
-from django.utils.module_loading import import_string
 from .base_settings import *
 import logging
 from django.core.mail.backends.smtp import EmailBackend
-
+if TEST_RECIPIENTS_GETTER is not None:
+    from django.utils.module_loading import import_string
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,6 @@ class DebugEmailBackend(EmailBackend):
 
 
     def send_messages(self, email_messages):
-
         if SEND_TO_TEST_RECIPIENTS:
 
             if TEST_RECIPIENTS_GETTER is not None:
