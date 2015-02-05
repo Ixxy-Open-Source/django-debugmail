@@ -36,6 +36,8 @@ class DebugEmailBackend(EmailBackend):
 
 
     def send_messages(self, email_messages):
+        if EXCLUDE_DJANGO_EMAILS:
+            email_messages = filter(lambda x: not x.subject.startswith('[Django]'), email_messages)
         if SEND_TO_TEST_RECIPIENTS:
 
             if TEST_RECIPIENTS_GETTER is not None:
