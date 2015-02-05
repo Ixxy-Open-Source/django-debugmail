@@ -36,8 +36,6 @@ class DebugEmailBackend(EmailBackend):
 
 
     def send_messages(self, email_messages):
-        if EXCLUDE_DJANGO_EMAILS:
-            email_messages = filter(lambda x: not x.subject.startswith('[Django]'), email_messages)
         if SEND_TO_TEST_RECIPIENTS:
 
             if TEST_RECIPIENTS_GETTER is not None:
@@ -65,6 +63,8 @@ class DebugEmailBackend(EmailBackend):
             count = super(DebugEmailBackend, self).send_messages(email_messages)
 
             if LOG_TO_DB:
+                if EXCLUDE_DJANGO_EMAILS:
+                    email_messages = filter(lambda x: not x.subject.startswith('[Django]'), email_messages)
                 log_emails('to real', email_messages)
 
             return count
