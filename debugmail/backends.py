@@ -17,9 +17,8 @@ except ImportError:
 class DebugEmailBackend(EmailBackend):
 
     def _send_to_alternates(self, email_messages, alternates):
-        email_messages = copy.deepcopy(email_messages)
+        email_messages = [copy.copy(email) for email in email_messages]
         for email in email_messages:
-
             email.subject = u"{0} [To: {1} Cc: {2} Bcc: {3}]".format(
                 email.subject,
                 u', '.join(email.to),
