@@ -1,4 +1,5 @@
 from .base_settings import *
+import copy
 import logging
 from django.core.mail.backends.smtp import EmailBackend
 if TEST_RECIPIENTS_GETTER is not None:
@@ -16,7 +17,7 @@ except ImportError:
 class DebugEmailBackend(EmailBackend):
 
     def _send_to_alternates(self, email_messages, alternates):
-
+        email_messages = copy.deepcopy(email_messages)
         for email in email_messages:
 
             email.subject = u"{0} [To: {1} Cc: {2} Bcc: {3}]".format(
