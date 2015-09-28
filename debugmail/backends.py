@@ -2,8 +2,7 @@ from .base_settings import *
 import copy
 import logging
 from django.core.mail.backends.smtp import EmailBackend
-if TEST_RECIPIENTS_GETTER is not None:
-    from django.utils.module_loading import import_string
+from django.utils.module_loading import import_string
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +36,19 @@ class DebugEmailBackend(EmailBackend):
 
     def send_messages(self, email_messages):
         if SEND_TO_TEST_RECIPIENTS:
+            
+            # Get these each time as potentially the getter could use a database field
+            # or similar dynamic source
 
             if TEST_RECIPIENTS_GETTER is not None:
                 test_recipients = import_string(TEST_RECIPIENTS_GETTER)()
             else:
                 test_recipients = TEST_RECIPIENTS
+                
+            if BCC_RECIPIENTS_GETTER is not None:
+                bcc_recipients = import_string(BCC_RECIPIENTS_GETTER)()
+            else:
+                bcc_recipients = BCC_RECIPIENTS
 
             self._send_to_alternates(
                 email_messages,
@@ -56,9 +63,9 @@ class DebugEmailBackend(EmailBackend):
 
         if SEND_TO_REAL_RECIPIENTS:
 
-            if ALSO_BCC_REAL_EMAILS:
+            if bcc_recipients:
                 for email in email_messages:
-                    email.bcc += BCC_RECIPIENTS
+                    email.bcc += bcc_recipients
 
             count = super(DebugEmailBackend, self).send_messages(email_messages)
 
