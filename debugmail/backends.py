@@ -2,7 +2,10 @@ from .base_settings import *
 import copy
 import logging
 from django.core.mail.backends.smtp import EmailBackend
-from django.utils.module_loading import import_string
+try:
+    from django.utils.module_loading import import_string
+except ImportError: # django version older than 1.7
+    from django.utils.module_loading import import_by_path as import_string
 
 logger = logging.getLogger(__name__)
 
