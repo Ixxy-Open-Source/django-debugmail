@@ -46,10 +46,8 @@ class DebugEmailBackend(EmailBackend):
             email.cc = []
             email.bcc = []
 
-        super(DebugEmailBackend, self).send_messages(email_messages)
-
-        if LOG_ALL_TO_DB:
-            log_emails('to alternates', email_messages)
+        count = self.do_send_messages(email_messages, log_emails_label=LOG_ALL_TO_DB and 'to alternates')
+        return count
 
     def send_messages(self, email_messages):
         
@@ -112,16 +110,41 @@ class DebugEmailBackend(EmailBackend):
             except Exception:
                 logger.error("Failed to set bcc on real emails")
 
-            count = super(DebugEmailBackend, self).send_messages(email_messages)
-            
-            try:
-                if LOG_TO_DB:
-                    if EXCLUDE_DJANGO_EMAILS:
-                        email_messages = filter(lambda x: not x.subject.startswith('[Django]'), email_messages)
-                    log_emails('to real', email_messages)
-            except Exception:
-                logger.error("Failed to log emails")
-
+            count = self.do_send_messages(email_messages, log_emails_label=LOG_TO_DB and 'to real')
             return count
 
 
+    def do_send_messages(self, email_messages, log_emails_label=None):
+        """
+        Sends one or more EmailMessage objects and returns the number of email
+        messages sent.
+        When log_emails_label is set, we log the emails using email_logger
+        """
+        if not email_messages:
+            return
+        with self._lock:
+            new_conn_created = self.open()
+            if not self.connection:
+                # We failed silently on open().
+                # Trying to send would be pointless.
+                return
+            num_sent = 0
+            for message in email_messages:
+                if log_emails_label:
+                    email_log = log_emails(log_emails_label, [message])[0]
+                    try:
+                        sent = self._send(message)
+                        if sent:
+                            num_sent += 1
+                    except Exception, e:
+                        email_log.success = False
+                        email_log.save()
+                        logger.error(e, exc_info=1, extra={'stack': True})
+                        raise e
+                else:
+                    sent = self._send(message)
+                    if sent:
+                        num_sent += 1
+            if new_conn_created:
+                self.close()
+        return num_sent
