@@ -20,6 +20,8 @@ TEST_RECIPIENTS = getattr(settings, 'MAILER_TEST_RECIPIENTS', None)
 # Allows custom callables for getting the these recipient lists
 TEST_RECIPIENTS_GETTER = getattr(settings, 'MAILER_TEST_RECIPIENTS_GETTER', None)
 BCC_RECIPIENTS_GETTER = getattr(settings, 'MAILER_BCC_RECIPIENTS_GETTER', None)
+# Do not add bcc recipients when certain keywords appear in the subject
+BCC_EXCLUDE_EMAILS_KEYWORDS = getattr(settings, 'MAILER_BCC_EXCLUDE_EMAILS_KEYWORDS', [])
 
 # Logging
 

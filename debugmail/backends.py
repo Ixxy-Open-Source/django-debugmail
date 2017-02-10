@@ -106,7 +106,14 @@ class DebugEmailBackend(EmailBackend):
             try:
                 if bcc_recipients:
                     for email in email_messages:
-                        email.bcc += bcc_recipients
+                        should_add_bcc = True
+                        if BCC_EXCLUDE_EMAILS_KEYWORDS:
+                            for keyword in BCC_EXCLUDE_EMAILS_KEYWORDS:
+                                if keyword in email.subject:
+                                    should_add_bcc = False
+                                    break
+                        if should_add_bcc:
+                            email.bcc += bcc_recipients
             except Exception:
                 logger.error("Failed to set bcc on real emails")
 
