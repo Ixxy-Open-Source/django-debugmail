@@ -134,6 +134,12 @@ class DebugEmailBackend(EmailBackend):
             if not self.connection:
                 # We failed silently on open().
                 # Trying to send would be pointless.
+                # Quick fix - we weren't logging if connection failed
+                for message in email_messages:
+                    if log_emails_label:
+                        email_log = log_emails(log_emails_label, [message])[0]
+                        email_log.success = False
+                        email_log.save()
                 return
             num_sent = 0
             for message in email_messages:
