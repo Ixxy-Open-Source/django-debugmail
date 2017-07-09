@@ -130,7 +130,10 @@ class DebugEmailBackend(EmailBackend):
         if not email_messages:
             return
         with self._lock:
-            new_conn_created = self.open()
+            try:
+                new_conn_created = self.open()
+            except Exception, e:
+                self.connection = None
             if not self.connection:
                 # We failed silently on open().
                 # Trying to send would be pointless.
