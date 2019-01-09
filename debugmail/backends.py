@@ -33,11 +33,11 @@ class DebugEmailBackend(EmailBackend):
         
         for email in email_messages:
             try:
-                email.subject = u"{0} [To: {1} Cc: {2} Bcc: {3}]".format(
+                email.subject = "{0} [To: {1} Cc: {2} Bcc: {3}]".format(
                     email.subject,
-                    u', '.join(email.to),
-                    u', '.join(email.cc),
-                    u', '.join(email.bcc)
+                    ', '.join(email.to),
+                    ', '.join(email.cc),
+                    ', '.join(email.bcc)
                 )
             except Exception:
                 email.subject = "[Error constructing email subject]"
@@ -132,7 +132,7 @@ class DebugEmailBackend(EmailBackend):
         with self._lock:
             try:
                 new_conn_created = self.open()
-            except Exception, e:
+            except Exception as e:
                 self.connection = None
             if not self.connection:
                 # We failed silently on open().
@@ -152,7 +152,7 @@ class DebugEmailBackend(EmailBackend):
                         sent = self._send(message)
                         if sent:
                             num_sent += 1
-                    except Exception, e:
+                    except Exception as e:
                         email_log.success = False
                         email_log.save()
                         logger.error(e, exc_info=1, extra={'stack': True})
